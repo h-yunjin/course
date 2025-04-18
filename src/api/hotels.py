@@ -1,7 +1,7 @@
 from fastapi import Query, Path, APIRouter
 from shemas.hotels import Hotel, PatchHotel
 
-from src.dependensies import PaginationDep
+from src.api.dependensies import PaginationDep
 
 
 
