@@ -1,77 +1,80 @@
-from fastapi import Query, Path, APIRouter
-from shemas.hotels import Hotel, PatchHotel
+from fastapi import Query, Path, APIRouter, Body
+from sqlalchemy import insert, select, delete, func
 
+from src.shemas.hotels import Hotel, PatchHotel
 from src.api.dependensies import PaginationDep
-
-
-
+from src.db import async_session_maker, engine
+from src.models.hotels import HotelsOrm
 
 
 router = APIRouter(prefix="/hotels", tags=["отели"])
 
-
-
-hotels = [
-    {"id": 1, "title": "Сочи", "name": "sochi"},
-    {"id": 2, "title": "Дубай", "name": "dubai"},
-    {"id": 3, "title": "Санкт-Петербуог", "name": "sankt-petesburg"},
-    {"id": 4, "title": "Москва", "name": "moskow"},
-    {"id": 5, "title": "Стерлитамак", "name": "sterlitamak"},
-    {"id": 6, "title": "Уфа", "name": "ufa"},
-    {"id": 7, "title": "Киров", "name": "kirov"},
-    {"id": 8, "title": "Донецк", "name": "donezck"},
-]    
+from src.repositories.hotels import HotelsRepositories
 
 @router.get("",
             summary="получение данных")
-def get_hotels(pagination: PaginationDep,
-               title: str | None = Query(None, description="город"), 
-               id: int | None = Query(None, description="айдишник"),
+async def get_hotels(pagination: PaginationDep,
+               title: str | None = Query(None, description="название отеля"), 
+               location: str | None = Query(None, description="местоположение"),
                ):
-        hotels_ = []
-        for hotel in hotels:
-            if id and id != hotel["id"]:
-                    continue
-            if title and title != hotel["title"]:
-                    continue
-            hotels_.append(hotel)
-        if pagination.page and pagination.per_page:
-            return hotels_[pagination.per_page * (pagination.page - 1):][:pagination.per_page]
-        if pagination.page and not pagination.per_page:
-            return hotels_[4 * (pagination.page - 1):][:4]
-        if not pagination.page and pagination.per_page:
-            return hotels_[:pagination.per_page]
-        return hotels_
+    per_page = pagination.per_page or 5
+    async with async_session_maker() as session:
+        return await HotelsRepositories(session).get_all(title, 
+                                                        location, 
+                                                        limit = per_page, 
+                                                        ofset = per_page * (pagination.page - 1))
+
+
+    
+
 
 @router.delete("/{hotel_id}",
             summary="удаление данных")
-def delete_hotel(hotel_id: int = Path(description="айдишник")):
-    global hotels
-    holels = [hotel for hotel in hotels if hotel["id"] != hotel_id]  
+async def delete_hotel(hotel_id: int = Path(description="айдишник")):
+    async with async_session_maker() as session:
+        delete_src = delete(HotelsOrm).where(HotelsOrm.id == hotel_id)   
+        await session.execute(delete_src)  
+        await session.commit()
     return {"status": "OK"}      
+
+
 
 @router.post("",
             summary="добавление данных")
-def add_hotel(hotel_table: Hotel):
-    global hotels
-    hotels.append(
-           {
-                "id": hotels[-1]["id"] + 1,
-                "title": hotel_table.title,
-                "name": hotel_table.name,
-           }
-    )
-    return {"status": "OK"}
+async def add_hotel(hotel_table: Hotel = Body(openapi_examples={
+    "1": {
+        "summary": "Сочи",
+        "value": {
+            "title": "Отель 5 звезд у моря",
+            "location": "Сочи. ул. Марата 24"
+        }
+    },
+    "2": {
+        "summary": "Дубай",
+        "value": {
+            "title": "Отель у фонтана",
+            "location": "Дубай. ул. Суворовский 24"
+        }
+    }
+})):
+    
+    async with async_session_maker() as session:
+        # await HotelsRepositories(session).add(hotel_table)
+        hotels = await HotelsRepositories(session).add(hotel_table)
+        await session.commit() 
+        return {"status": "OK", "data": hotels}
+        
 
 @router.put("/{hotel_id}",
             summary="обновление данных")
-def update_all(hotel_table: Hotel, hotel_id: int = Path(description="айдишник")):
-    for hotel in hotels:
-        if hotel_id == hotel["id"]:
-            hotel["title"] = hotel_table.title
-            hotel["name"] = hotel_table.name
-            return {"status": "OK"}
-        
+async def update_all(hotel_table: Hotel, hotel_id: int = Path(description="айдишник")):
+    async with async_session_maker() as session:
+        add_hotel_stm = update({'no_of_logins': User.no_of_logins + 1})   
+        await session.execute(add_hotel_stm)  
+        await session.commit()
+        return {"status": "OK"}
+
+
 
 @router.patch("/{hotel_id}",
             summary="частичное обновление данных")
