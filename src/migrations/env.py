@@ -25,6 +25,7 @@ if config.config_file_name is not None:
 from src.db import Base
 from src.models.hotels import HotelsOrm
 from src.models.rooms import RoomsOrm
+from src.models.users import UsersOrm
 
 target_metadata = Base.metadata
 

@@ -1,10 +1,8 @@
 from fastapi import Query, Path, APIRouter, Body
-from sqlalchemy import insert, select, delete, func
 
-from src.shemas.hotels import Hotel, PatchHotel
+from src.shemas.hotels import HotelAdd, PatchHotel
 from src.api.dependensies import PaginationDep
 from src.db import async_session_maker, engine
-from src.models.hotels import HotelsOrm
 from src.repositories.hotels import HotelsRepositories
 
 
@@ -19,7 +17,7 @@ async def get_hotels(pagination: PaginationDep,
                title: str | None = Query(None, description="название отеля"), 
                location: str | None = Query(None, description="местоположение"),
                ):
-    per_page = pagination.per_page or 5
+    per_page = pagination.per_page or 100
     async with async_session_maker() as session:
         return await HotelsRepositories(session).get_all(title, 
                                                         location, 
@@ -40,7 +38,7 @@ async def delete_hotel(hotel_id: int):
 
 @router.post("",
             summary="добавление данных")
-async def add_hotel(hotel_table: Hotel = Body(openapi_examples={
+async def add_hotel(hotel_table: HotelAdd = Body(openapi_examples={
     "1": {
         "summary": "Сочи",
         "value": {
@@ -58,7 +56,6 @@ async def add_hotel(hotel_table: Hotel = Body(openapi_examples={
 })):
     
     async with async_session_maker() as session:
-        # await HotelsRepositories(session).add(hotel_table)
         hotels = await HotelsRepositories(session).add(hotel_table)
         await session.commit() 
         return {"status": "OK", "data": hotels}
@@ -67,7 +64,7 @@ async def add_hotel(hotel_table: Hotel = Body(openapi_examples={
 
 @router.put("/{hotel_id}",
             summary="обновление данных")
-async def update_all(hotel_table: Hotel, hotel_id: int = Path(description="айдишник")):
+async def update_all(hotel_table: HotelAdd, hotel_id: int = Path(description="айдишник")):
     async with async_session_maker() as session:
         await HotelsRepositories(session).edit(hotel_table, id = hotel_id)
         await session.commit()
