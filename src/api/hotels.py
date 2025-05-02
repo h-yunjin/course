@@ -1,4 +1,5 @@
-from fastapi import Query, Path, APIRouter, Body
+from typing import Annotated
+from fastapi import Query, Path, APIRouter, Body, Depends
 
 from src.shemas.hotels import HotelAdd, PatchHotel
 from src.api.dependensies import PaginationDep
@@ -11,11 +12,11 @@ router = APIRouter(prefix="/hotels", tags=["отели"])
 
 
 
-@router.get("",
-            summary="получение данных")
+
+@router.get("",summary="получение данных")
 async def get_hotels(pagination: PaginationDep,
-               title: str | None = Query(None, description="название отеля"), 
-               location: str | None = Query(None, description="местоположение"),
+               title: str | None = Query(None), 
+               location: str | None = Query(None),
                ):
     per_page = pagination.per_page or 100
     async with async_session_maker() as session:
@@ -26,18 +27,7 @@ async def get_hotels(pagination: PaginationDep,
 
 
 
-@router.delete("/{hotel_id}",
-            summary="удаление данных")
-async def delete_hotel(hotel_id: int):
-    async with async_session_maker() as session: 
-        hotel = await HotelsRepositories(session).delete(id=hotel_id)
-        await session.commit()
-        return {"status": "OK", "data": hotel}      
-
-
-
-@router.post("",
-            summary="добавление данных")
+@router.post("",summary="добавление данных")
 async def add_hotel(hotel_table: HotelAdd = Body(openapi_examples={
     "1": {
         "summary": "Сочи",
@@ -59,12 +49,20 @@ async def add_hotel(hotel_table: HotelAdd = Body(openapi_examples={
         hotels = await HotelsRepositories(session).add(hotel_table)
         await session.commit() 
         return {"status": "OK", "data": hotels}
-        
 
 
-@router.put("/{hotel_id}",
-            summary="обновление данных")
-async def update_all(hotel_table: HotelAdd, hotel_id: int = Path(description="айдишник")):
+
+@router.delete("/{hotel_id}",summary="удаление данных")
+async def delete_hotel(hotel_id: int):
+    async with async_session_maker() as session: 
+        hotel = await HotelsRepositories(session).delete(id=hotel_id)
+        await session.commit()
+        return {"status": "OK", "data": hotel}      
+
+
+
+@router.put("/{hotel_id}",summary="обновление данных")
+async def update_all(hotel_table: Annotated[HotelAdd, Depends()], hotel_id: int = Path(description="айдишник")):
     async with async_session_maker() as session:
         await HotelsRepositories(session).edit(hotel_table, id = hotel_id)
         await session.commit()
@@ -72,20 +70,21 @@ async def update_all(hotel_table: HotelAdd, hotel_id: int = Path(description="а
 
 
 
-@router.patch("/{hotel_id}",
-            summary="частичное обновление данных")
-async def update(hotel_table: PatchHotel, hotel_id: int = Path(description="айдишник")):        
+@router.patch("/{hotel_id}", summary="частичное обновление данных")
+async def update(hotel_table: Annotated[PatchHotel, Depends()], hotel_id: int = Path(description="айдишник")):        
     async with async_session_maker() as session:
         await HotelsRepositories(session).edit(hotel_table, exclude_unset = True, id = hotel_id)
         await session.commit()
         return {"status": "OK"}    
-
+    
 
 
 @router.get("/{hotel_id}", summary="получение данных по айдишнику")
 async def get_hotel(hotel_id: int = Path(description="айдишник")):
     async with async_session_maker() as session:
         return await HotelsRepositories(session).get_one_or_none(id=hotel_id)
+
+
     
 
 

@@ -15,8 +15,11 @@ class BaseRepositories:
         self.session = session
 
 
-    async def get_all(self, *args, **kwargs):
-        query = select(self.model)
+    async def get_all(self, *args, **filter_by):
+        print(f"kk")
+        query = select(self.model).filter_by(**filter_by)
+        print(query.compile(engine, compile_kwargs={"literal_binds": True}))
+        
         result = await self.session.execute(query) 
         return [self.shema.model_validate(model, from_attributes=True) for model in result.scalars().all()]
 
@@ -42,7 +45,6 @@ class BaseRepositories:
         print(edit_data_stm.compile(engine, compile_kwargs={"literal_binds": True})) 
         await self.session.execute(edit_data_stm)  
         
-
 
     async def delete(self, **filter_by):
         delete_data_stm = delete(self.model).filter_by(**filter_by).returning(self.model)  

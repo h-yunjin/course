@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Response
+from typing import Annotated
+from fastapi import APIRouter, HTTPException, Response, Depends
 
 import sqlalchemy
 
@@ -13,9 +14,17 @@ from src.api.dependensies import UserIdDEp
 router = APIRouter(prefix="/auth", tags=["авторизация и аутонфикция"])
 
 
+@router.get("/me", summary="гет ми", description="тут можно узнать под чьим логином ты вошёл")
+async def get_me(user_id: UserIdDEp):
+   async with async_session_maker() as session:
+       user = await UsersRepositories(session).get_one_or_none(id=user_id)
+       return {"data": user}
+   
+
+
 @router.post("/register", summary="регистрация")
 async def register(
-    data: UserRequestAdd
+    data: Annotated[UserRequestAdd, Depends()]
 ):
     hashed_password = AuthServise().hashed_psw(data.password)
     hashed_data = UserAdd(email=data.email, password=hashed_password)
@@ -29,9 +38,9 @@ async def register(
   
 
 
-@router.post("/login")
+@router.post("/login", summary="авторизация")
 async def login(
-    data: UserRequestAdd, 
+    data: Annotated[UserRequestAdd, Depends()], 
     response: Response
 ):
     async with async_session_maker() as session:
@@ -46,15 +55,7 @@ async def login(
 
 
 
-@router.get("/me")
-async def get_me(user_id: UserIdDEp):
-   async with async_session_maker() as session:
-       user = await UsersRepositories(session).get_one_or_none(id=user_id)
-       return {"data": user}
-   
-
-
-@router.post("/logout")
-async def logout(response: Response):
-    response.set_cookie("access_token")
+@router.post("/logout", summary="выйти")
+def logout(response: Response):
+    response.delete_cookie("access_token")
     return {"status": "OK"}
