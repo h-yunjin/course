@@ -15,13 +15,14 @@ class BaseRepositories:
         self.session = session
 
 
-    async def get_all(self, *args, **filter_by):
-        print(f"kk")
+    async def get_filtered(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
-        print(query.compile(engine, compile_kwargs={"literal_binds": True}))
-        
         result = await self.session.execute(query) 
-        return [self.shema.model_validate(model, from_attributes=True) for model in result.scalars().all()]
+        return [self.shema.model_validate(model, from_attributes=True) for model in result.scalars().all()]    
+
+
+    async def get_all(self):
+        return await self.get_filtered()
 
 
     async def get_one_or_none(self, **filter_by):

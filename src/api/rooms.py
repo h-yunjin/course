@@ -1,27 +1,45 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Path, Depends
 
-
+from src.api.dependensies import DB_Dep
 from src.repositories.rooms import RoomsRepositories
-from src.shemas.rooms import PatchRoomAdd, RoomAdd
+from src.shemas.rooms import PatchRequestRoomAdd, PatchRoomAdd, RoomAdd, RoomRequestAdd
 from src.db import async_session_maker
 
 router = APIRouter(prefix="/hotels", tags=["номера"])
 
-@router.get("/{hotel_id}/room", summary="получение данных")
-async def get_room(hotel_id: int = Path(description="айдишник отеля")):
-    async with async_session_maker() as session:
-        rooms = await RoomsRepositories(session).get_all(hotel_id=hotel_id)
+
+
+@router.get("/{hotel_id}/rooms/{room_id}", summary="получение данных определённого номера")
+async def get_room(
+    db: DB_Dep,
+    hotel_id: int = Path(description="айдишник отеля"), 
+    room_id: int = Path(description="айдишник номера")
+):
+    rooms = await db.rooms.get_one_or_none(id=room_id, hotel_id=hotel_id)
     return {"data": rooms}    
 
 
 
-@router.post("/room", summary="добавление данных")
-async def add_room(room_table: RoomAdd = Body(openapi_examples={
+@router.get("/{hotel_id}/rooms", summary="получение всех данных")
+async def get_room(
+    db: DB_Dep,
+    hotel_id: int = Path(description="айдишник отеля")
+):
+
+    rooms = await db.rooms.get_filtered(hotel_id=hotel_id)
+    return {"data": rooms}    
+
+
+
+@router.post("/{hotel_id}/rooms", summary="добавление данных")
+async def add_room(
+    db: DB_Dep,
+    hotel_id: int = Path(description="айдишник отеля"), 
+    room_table: RoomRequestAdd = Body(openapi_examples={
     "1": {
         "summary": "1-ый номер",
         "value": {
-            "hotel_id": "37",
             "title": "2 местный номер ",
             "description": "хороший",
             "price": "5.65",
@@ -31,7 +49,6 @@ async def add_room(room_table: RoomAdd = Body(openapi_examples={
     "2": {
         "summary": "2-ой номер",
         "value": {
-            "hotel_id": "38",
             "title": "3 местный номер",
             "description": "неплохой",
             "price": "7.90",
@@ -39,42 +56,49 @@ async def add_room(room_table: RoomAdd = Body(openapi_examples={
         }
     }
 })):
-    async with async_session_maker() as session:
-        rooms = await RoomsRepositories(session).add(room_table)
-        await session.commit()
+    _room_table = RoomAdd(hotel_id=hotel_id, **room_table.model_dump())
+    rooms = await db.rooms.add(_room_table)
+    await db.rooms.commit()
     return {"data": rooms}
 
 
 
-@router.delete("/{room_id}/room", summary="удаление данных")
-async def delete_room(room_id: int = Path(description="айдишник номера")):
-    async with async_session_maker() as session:
-        room = await RoomsRepositories(session).delete(id=room_id)
-        await session.commit()
+@router.delete("/{hotel_id}/rooms", summary="удаление данных")
+async def delete_room(
+    db: DB_Dep,
+    hotel_id: int = Path(description="айдишник отеля"), 
+    room_id: int = Path(description="айдишник номера")
+):
+    room = db.rooms.delete(id=room_id, hotel_id=hotel_id)
+    await db.rooms.commit()
     return {"data": room}  
 
 
 
-@router.put("/{room_id}/room", summary="обновление данных")
+@router.put("/{hotel_id}/rooms/{room_id}", summary="обновление данных")
 async def update_all(
-    room_table: Annotated[RoomAdd, Depends()],
+    db: DB_Dep,
+    room_table: RoomRequestAdd,
+    hotel_id: int = Path(description="айдишник отеля"),
     room_id: int = Path(description="айдишник номера"),
 ):
-    async with async_session_maker() as session:
-        await RoomsRepositories(session).edit(room_table, id=room_id)
-        await session.commit()
+    _room_table = RoomAdd(hotel_id=hotel_id, **room_table.model_dump())
+    await db.rooms.edit(_room_table, id=room_id)
+    await db.rooms.commit()
     return {"status": "OK"}    
 
 
 
-@router.patch("/{room_id}/room", summary="частичное обновление данных")
+@router.patch("/{hotel_id}/rooms/{room_id}", summary="частичное обновление данных")
 async def update(
-    room_table: Annotated[PatchRoomAdd, Depends()],
+    db: DB_Dep,
+    room_table: PatchRequestRoomAdd,
+    hotel_id: int = Path( description="айдишник отеля"),
     room_id: int = Path(description="айдишник номера")
 ):
-    async with async_session_maker() as session:
-        await RoomsRepositories(session).edit(room_table, exclude_unset=True, id=room_id)
-        await session.commit()
+    _room_table = PatchRoomAdd(hotel_id=hotel_id, **room_table.model_dump(), exclude_unset=True)
+    await db.rooms.edit(_room_table, id=room_id, hotel_id=hotel_id)
+    await db.rooms.commit()
     return {"status": "OK"}    
 
 
