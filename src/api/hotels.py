@@ -13,7 +13,7 @@ router = APIRouter(prefix="/hotels", tags=["отели"])
 
 
 
-@router.get("",summary="получение данных")
+@router.get("",summary="получение всех отелей")
 async def get_hotels(pagination: PaginationDep,
                 db: DB_Dep,
                 title: str | None = Query(None), 
@@ -33,7 +33,7 @@ async def get_hotels(pagination: PaginationDep,
 
 
 
-@router.post("",summary="добавление данных")
+@router.post("",summary="добавление отеля")
 async def add_hotel(
     db: DB_Dep,
     hotel_table: HotelAdd = Body(openapi_examples={
@@ -58,7 +58,7 @@ async def add_hotel(
 
 
 
-@router.delete("/{hotel_id}",summary="удаление данных")
+@router.delete("/{hotel_id}",summary="удаление отеля")
 async def delete_hotel(
     hotel_id: int,
     db: DB_Dep,
@@ -69,7 +69,7 @@ async def delete_hotel(
 
 
 
-@router.put("/{hotel_id}",summary="обновление данных")
+@router.put("/{hotel_id}",summary="обновление отеля")
 async def update_all(
     db: DB_Dep,
     hotel_table: Annotated[HotelAdd, Depends()], 
@@ -81,7 +81,7 @@ async def update_all(
 
 
 
-@router.patch("/{hotel_id}", summary="частичное обновление данных")
+@router.patch("/{hotel_id}", summary="частичное обновление отеля")
 async def update(
     db: DB_Dep,
     hotel_table: Annotated[PatchHotel, Depends()], 
@@ -93,7 +93,7 @@ async def update(
     
 
 
-@router.get("/{hotel_id}", summary="получение данных по айдишнику")
+@router.get("/{hotel_id}", summary="получение отеля по айдишнику")
 async def get_hotel(
     db: DB_Dep,
     hotel_id: int = Path(description="айдишник")

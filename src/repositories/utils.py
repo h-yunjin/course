@@ -45,7 +45,5 @@ def get_id_bookings(
             )
 ))
      
-        
-        
         print(query.compile(engine, compile_kwargs={"literal_binds": True}))
         return query

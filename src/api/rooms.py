@@ -19,7 +19,7 @@ async def get_room(
 
 
 
-@router.get("/{hotel_id}/rooms", summary="получение всех данных")
+@router.get("/{hotel_id}/rooms", summary="получение всех номеров")
 async def get_room(
     db: DB_Dep,
     date_from: date = Query(example="2025-05-06"),
@@ -35,7 +35,7 @@ async def get_room(
 
 
 
-@router.post("/{hotel_id}/rooms", summary="добавление данных")
+@router.post("/{hotel_id}/rooms", summary="добавление номера")
 async def add_room(
     db: DB_Dep,
     hotel_id: int = Path(description="айдишник отеля"), 
@@ -66,7 +66,7 @@ async def add_room(
 
 
 
-@router.delete("/{hotel_id}/rooms", summary="удаление данных")
+@router.delete("/{hotel_id}/rooms", summary="удаление номера")
 async def delete_room(
     db: DB_Dep,
     hotel_id: int = Path(description="айдишник отеля"), 
@@ -78,7 +78,7 @@ async def delete_room(
 
 
 
-@router.put("/{hotel_id}/rooms/{room_id}", summary="обновление данных")
+@router.put("/{hotel_id}/rooms/{room_id}", summary="обновление номера")
 async def update_all(
     db: DB_Dep,
     room_table: RoomRequestAdd,
@@ -92,7 +92,7 @@ async def update_all(
 
 
 
-@router.patch("/{hotel_id}/rooms/{room_id}", summary="частичное обновление данных")
+@router.patch("/{hotel_id}/rooms/{room_id}", summary="частичное обновление номера")
 async def update(
     db: DB_Dep,
     room_table: PatchRequestRoomAdd,

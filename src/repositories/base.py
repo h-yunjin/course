@@ -22,6 +22,7 @@ class BaseRepositories:
             .filter(*filter)
             )
         result = await self.session.execute(query) 
+        print(query.compile(engine, compile_kwargs={"literal_binds": True}))
         return [self.shema.model_validate(model, from_attributes=True) for model in result.scalars().all()]    
 
 
@@ -42,6 +43,7 @@ class BaseRepositories:
         add_data_stm = insert(self.model).values(**data.model_dump()).returning(self.model)
         result = await self.session.execute(add_data_stm)  
         model = result.scalars().one()
+        print(add_data_stm.compile(engine, compile_kwargs={"literal_binds": True}))
         return self.shema.model_validate(model, from_attributes=True)
     
 
