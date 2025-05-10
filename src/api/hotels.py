@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import Query, Path, APIRouter, Body, Depends
+from datetime import date
 
 from src.shemas.hotels import HotelAdd, PatchHotel
 from src.api.dependensies import DB_Dep, PaginationDep
@@ -14,16 +15,20 @@ router = APIRouter(prefix="/hotels", tags=["отели"])
 
 @router.get("",summary="получение данных")
 async def get_hotels(pagination: PaginationDep,
-               db: DB_Dep,
-               title: str | None = Query(None), 
-               location: str | None = Query(None),
-               ):
+                db: DB_Dep,
+                title: str | None = Query(None), 
+                location: str | None = Query(None),
+                date_from: date = Query(example="2025-05-06"),
+                date_to: date = Query(example="2025-05-07"),
+):
     per_page = pagination.per_page or 100
-    return await db.hotels.get_all(
+    return await db.hotels.get_filtered_by_time(
+        date_from,
+        date_to,
         title, 
         location, 
-        limit = per_page, 
-        ofset = per_page * (pagination.page - 1)
+        limit= per_page, 
+        ofset= per_page * (pagination.page - 1)
 )
 
 
@@ -94,7 +99,10 @@ async def get_hotel(
     hotel_id: int = Path(description="айдишник")
 ):
     return await db.hotels.get_one_or_none(id=hotel_id)
-    
+
+
+
+
 
     
 

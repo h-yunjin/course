@@ -1,10 +1,8 @@
-from typing import Annotated
-from fastapi import APIRouter, Body, Path, Depends
+from datetime import date
+from fastapi import APIRouter, Body, Path, Query
 
 from src.api.dependensies import DB_Dep
-from src.repositories.rooms import RoomsRepositories
 from src.shemas.rooms import PatchRequestRoomAdd, PatchRoomAdd, RoomAdd, RoomRequestAdd
-from src.db import async_session_maker
 
 router = APIRouter(prefix="/hotels", tags=["номера"])
 
@@ -24,11 +22,16 @@ async def get_room(
 @router.get("/{hotel_id}/rooms", summary="получение всех данных")
 async def get_room(
     db: DB_Dep,
-    hotel_id: int = Path(description="айдишник отеля")
+    date_from: date = Query(example="2025-05-06"),
+    date_to: date = Query(example="2025-05-07"),
+    hotel_id: int = Path(description="айдишник отеля"),
 ):
 
-    rooms = await db.rooms.get_filtered(hotel_id=hotel_id)
+    rooms = await db.rooms.get_filtered_by_time(date_from=date_from, date_to=date_to, hotel_id=hotel_id)
     return {"data": rooms}    
+
+
+
 
 
 

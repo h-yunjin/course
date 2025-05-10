@@ -15,8 +15,12 @@ class BaseRepositories:
         self.session = session
 
 
-    async def get_filtered(self, **filter_by):
-        query = select(self.model).filter_by(**filter_by)
+    async def get_filtered(self, *filter, **filter_by):
+        query = (
+            select(self.model)
+            .filter_by(**filter_by)
+            .filter(*filter)
+            )
         result = await self.session.execute(query) 
         return [self.shema.model_validate(model, from_attributes=True) for model in result.scalars().all()]    
 
