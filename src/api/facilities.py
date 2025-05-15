@@ -6,7 +6,7 @@ from src.shemas.facilities import FacilitiesAdd
 router = APIRouter(prefix="/servises", tags=["удобства"])
 
 
-@router.post("", summary="получение всех удобств")
+@router.post("", summary="добавление удобств")
 async def add_servises(
     db: DB_Dep,
     title: FacilitiesAdd
@@ -16,7 +16,7 @@ async def add_servises(
     return {"data": servise}
 
 
-@router.get("", summary="добавление удобств")
+@router.get("", summary="получение всех удобств")
 async def get_all_servises(
     db: DB_Dep
 ):

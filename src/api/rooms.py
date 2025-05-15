@@ -1,11 +1,12 @@
 from datetime import date
 from fastapi import APIRouter, Body, Path, Query
 
+from shemas.facilities import FacilitiesAdd, FacilitiesRoomAdd
 from src.api.dependensies import DB_Dep
 from src.shemas.rooms import PatchRequestRoomAdd, PatchRoomAdd, RoomAdd, RoomRequestAdd
 
-router = APIRouter(prefix="/hotels", tags=["номера"])
 
+router = APIRouter(prefix="/hotels", tags=["номера"])
 
 
 @router.get("/{hotel_id}/rooms/{room_id}", summary="получение данных определённого номера")
@@ -14,7 +15,7 @@ async def get_room(
     hotel_id: int = Path(description="айдишник отеля"), 
     room_id: int = Path(description="айдишник номера")
 ):
-    rooms = await db.rooms.get_one_or_none(id=room_id, hotel_id=hotel_id)
+    rooms = await db.rooms.get_one_or_none_servise(id=room_id, hotel_id=hotel_id)
     return {"data": rooms}    
 
 
@@ -26,12 +27,8 @@ async def get_room(
     date_to: date = Query(example="2025-05-07"),
     hotel_id: int = Path(description="айдишник отеля"),
 ):
-
     rooms = await db.rooms.get_filtered_by_time(date_from=date_from, date_to=date_to, hotel_id=hotel_id)
     return {"data": rooms}    
-
-
-
 
 
 
@@ -46,7 +43,8 @@ async def add_room(
             "title": "2 местный номер ",
             "description": "хороший",
             "price": "5.65",
-            "quentity": "3"
+            "quentity": "3",
+            "servises_ids": "[1,2]"
         }
     },
     "2": {
@@ -55,13 +53,16 @@ async def add_room(
             "title": "3 местный номер",
             "description": "неплохой",
             "price": "7.90",
-            "quentity": "5"
+            "quentity": "5",
+            "servises_ids": "[1,2]"
         }
     }
 })):
     _room_table = RoomAdd(hotel_id=hotel_id, **room_table.model_dump())
     rooms = await db.rooms.add(_room_table)
-    await db.rooms.commit()
+    rooms_servises = [FacilitiesRoomAdd(room_id=rooms.id, servise_id=sr_id) for sr_id in room_table.servises_ids]
+    await db.servisesroom.add_bulk(rooms_servises)
+    await db.commit()
     return {"data": rooms}
 
 
@@ -87,7 +88,8 @@ async def update_all(
 ):
     _room_table = RoomAdd(hotel_id=hotel_id, **room_table.model_dump())
     await db.rooms.edit(_room_table, id=room_id)
-    await db.rooms.commit()
+    await db.servisesroom.edit_servises(room_id, room_table.servises_ids)
+    await db.commit()
     return {"status": "OK"}    
 
 
@@ -99,10 +101,14 @@ async def update(
     hotel_id: int = Path( description="айдишник отеля"),
     room_id: int = Path(description="айдишник номера")
 ):
-    _room_table = PatchRoomAdd(hotel_id=hotel_id, **room_table.model_dump(), exclude_unset=True)
-    await db.rooms.edit(_room_table, id=room_id, hotel_id=hotel_id)
-    await db.rooms.commit()
+    _room_table = PatchRoomAdd(hotel_id=hotel_id, **room_table.model_dump(exclude_unset=True))
+    await db.rooms.edit(_room_table, exclude_unset=True, id=room_id, hotel_id=hotel_id)
+    if room_table.servises_ids is not None:
+        await db.servisesroom.edit_servises(room_id, room_table.servises_ids)
+    await db.commit()
     return {"status": "OK"}    
+
+
 
 
 

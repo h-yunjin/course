@@ -3,7 +3,13 @@ from pydantic import BaseModel, Field
 class FacilitiesAdd(BaseModel):
     title: str = Field()
 
-class Facilities(BaseModel):
+class Facilities(FacilitiesAdd):
     id: int
-    title: str
 
+
+class FacilitiesRoomAdd(BaseModel):
+    room_id: int
+    servise_id: int
+
+class FacilitiesRoom(FacilitiesRoomAdd):
+    id: int
