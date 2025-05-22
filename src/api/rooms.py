@@ -15,7 +15,7 @@ async def get_room(
     hotel_id: int = Path(description="айдишник отеля"), 
     room_id: int = Path(description="айдишник номера")
 ):
-    rooms = await db.rooms.get_one_or_none_servise(id=room_id, hotel_id=hotel_id)
+    rooms = await db.rooms.get_one_or_none_with_rels(id=room_id, hotel_id=hotel_id)
     return {"data": rooms}    
 
 
@@ -44,7 +44,7 @@ async def add_room(
             "description": "хороший",
             "price": "5.65",
             "quentity": "3",
-            "servises_ids": "[1,2]"
+            "servises_ids": [8,9]
         }
     },
     "2": {
@@ -54,7 +54,7 @@ async def add_room(
             "description": "неплохой",
             "price": "7.90",
             "quentity": "5",
-            "servises_ids": "[1,2]"
+            "servises_ids": [8,9]
         }
     }
 })):

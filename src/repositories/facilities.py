@@ -1,18 +1,18 @@
 from sqlalchemy import insert, select, update, delete
-from src.db import engine
 
+from src.repositories.mappers.mappers import ServiseMapper, ServiseRoomMapper
+from src.db import engine
 from src.models.facilities import FacilitiesOrm, FacilitiesRoomsOrm
 from src.repositories.base import BaseRepositories
-from src.shemas.facilities import Facilities, FacilitiesRoom
 
 
 class FacilitiesRepositories(BaseRepositories):
     model=FacilitiesOrm
-    shema=Facilities
+    mapper = ServiseMapper
 
 class FacilitiesRoomRepositories(BaseRepositories):
     model=FacilitiesRoomsOrm
-    shema=FacilitiesRoom
+    mapper = ServiseRoomMapper
  
     async def edit_servises(self, room_id: int, servises_ids: list[int]) -> None:
         query = (

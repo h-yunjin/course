@@ -6,10 +6,10 @@ from src.repositories.users import UsersRepositories
 
 
 class DB_Manager():
-    def __init__(self, session_factory):
-        self.session_factory = session_factory
+    def __init__(self, async_session_maker):
+        self.async_session_maker = async_session_maker
     async def __aenter__(self):    
-        self.session = self.session_factory()
+        self.session = self.async_session_maker()
 
         self.hotels = HotelsRepositories(self.session)
         self.rooms = RoomsRepositories(self.session)

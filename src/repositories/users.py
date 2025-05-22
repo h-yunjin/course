@@ -1,12 +1,15 @@
 from pydantic import EmailStr
 from sqlalchemy import select
-from models.users import UsersOrm
-from shemas.users import User, UserHashedPsw
+
+from src.models.users import UsersOrm
+from src.repositories.mappers.mappers import UserMapper
+from src.shemas.users import User, UserHashedPsw
 from src.repositories.base import BaseRepositories
+
 
 class UsersRepositories(BaseRepositories):
     model=UsersOrm
-    shema=User
+    mapper = UserMapper
 
     async def get_hashed_psw(self, email: EmailStr):
         query = select(self.model).filter_by(email=email)

@@ -12,6 +12,8 @@ class Pagination(BaseModel):
 
 PaginationDep = Annotated[Pagination, Depends()]    
 
+#----------------------------------------------------------------------------------------------------------------------------------------
+
 def get_token(request: Request):
     token = request.cookies.get("access_token", None)
     if token is None:
@@ -26,6 +28,8 @@ def current_user_id(token: Annotated[str, Depends(get_token)]) -> int:
 
 UserIdDEp = Annotated[str, Depends(current_user_id)]
 
+
+#----------------------------------------------------------------------------------------------------------------------------------------
 
 async def get_db():
     async with DB_Manager(async_session_maker) as db:

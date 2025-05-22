@@ -1,15 +1,16 @@
 # print(query.compile(engine, compile_kwargs={"literal_binds": True}))
-from sqlalchemy import Exists, select, insert, delete, update
+from sqlalchemy import select, insert, delete, update
 from sqlalchemy.sql import exists  
+from pydantic import BaseModel
 
+from src.repositories.mappers.base import Mapper
 from src.db import engine
 
-from pydantic import BaseModel
 
 
 class BaseRepositories:
     model = None
-    shema: BaseModel = None
+    mapper: Mapper = None
  
     def __init__(self, session):
         self.session = session
@@ -23,7 +24,7 @@ class BaseRepositories:
             )
         result = await self.session.execute(query) 
         print(query.compile(engine, compile_kwargs={"literal_binds": True}))
-        return [self.shema.model_validate(model, from_attributes=True) for model in result.scalars().all()]    
+        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]    
 
 
     async def get_all(self):
@@ -36,7 +37,7 @@ class BaseRepositories:
         model = result.scalars().one_or_none()
         if model is None:
             return None
-        return self.shema.model_validate(model, from_attributes=True)
+        return self.mapper.map_to_domain_entity(model)
     
 
     async def add(self, data: BaseModel):
@@ -44,10 +45,10 @@ class BaseRepositories:
         result = await self.session.execute(add_data_stm)  
         model = result.scalars().one()
         print(add_data_stm.compile(engine, compile_kwargs={"literal_binds": True}))
-        return self.shema.model_validate(model, from_attributes=True)
+        return self.mapper.map_to_domain_entity(model)
       
 
-    async def add_bulk(self, data: list[BaseModel]):
+    async def add_bulk(self, data: list[BaseModel]) -> None:
         add_data_stm = insert(self.model).values([item.model_dump() for item in data])
         return await self.session.execute(add_data_stm)  
     
@@ -61,5 +62,5 @@ class BaseRepositories:
     async def delete(self, **filter_by):
         delete_data_stm = delete(self.model).filter_by(**filter_by).returning(self.model)  
         result = await self.session.execute(delete_data_stm)  
-        return result.scalars().one()
-         
+        model = result.scalars().one()
+        return self.mapper.map_to_domain_entity(model)

@@ -22,7 +22,7 @@ async def get_hotels(pagination: PaginationDep,
                 date_to: date = Query(example="2025-05-07"),
 ):
     per_page = pagination.per_page or 100
-    return await db.hotels.get_filtered_by_time(
+    hotels =  await db.hotels.get_filtered_by_time(
         date_from,
         date_to,
         title, 
@@ -30,6 +30,7 @@ async def get_hotels(pagination: PaginationDep,
         limit= per_page, 
         ofset= per_page * (pagination.page - 1)
 )
+    return {"data": hotels}
 
 
 
@@ -53,7 +54,7 @@ async def add_hotel(
     }
 })):
     hotels = await db.hotels.add(hotel_table)
-    await db.hotels.commit() 
+    await db.commit() 
     return {"status": "OK", "data": hotels}
 
 
@@ -64,7 +65,7 @@ async def delete_hotel(
     db: DB_Dep,
 ):
     hotel = db.hotels.delete(id=hotel_id)
-    await db.hotels.commit()
+    await db.commit()
     return {"status": "OK", "data": hotel}      
 
 
@@ -76,7 +77,7 @@ async def update_all(
     hotel_id: int = Path(description="айдишник"),
 ):
     await db.hotels.edit(hotel_table, id = hotel_id)
-    await db.hotels.commit()
+    await db.commit()
     return {"status": "OK"}
 
 
@@ -88,7 +89,7 @@ async def update(
     hotel_id: int = Path(description="айдишник")
 ):        
     await db.hotels.edit(hotel_table, exclude_unset = True, id = hotel_id)
-    await db.hotels.commit()
+    await db.commit()
     return {"status": "OK"}    
     
 
