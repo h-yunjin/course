@@ -1,6 +1,7 @@
 from typing import Annotated
 from fastapi import Query, Path, APIRouter, Body, Depends
 from datetime import date
+from fastapi_cache.decorator import cache
 
 from src.shemas.hotels import HotelAdd, PatchHotel
 from src.api.dependensies import DB_Dep, PaginationDep
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/hotels", tags=["отели"])
 
 
 @router.get("",summary="получение всех отелей")
+@cache(expire=10)
 async def get_hotels(pagination: PaginationDep,
                 db: DB_Dep,
                 title: str | None = Query(None), 

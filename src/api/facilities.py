@@ -1,5 +1,6 @@
 import json
 from fastapi import APIRouter
+from fastapi_cache.decorator import cache
 
 from src.api.dependensies import DB_Dep
 from src.shemas.facilities import FacilitiesAdd
@@ -19,17 +20,10 @@ async def add_servises(
 
 
 @router.get("", summary="получение всех удобств")
+@cache(expire=60)
 async def get_all_servises(
     db: DB_Dep
 ):
-    servises_from_cache = await redis_manager.get("servises")
-    print(f"{servises_from_cache}")
-    if not servises_from_cache:
-        servises = await db.servises.get_all()
-        servise_shemas: list[dict] = [data.model_dump() for data in servises]
-        servise_json = json.dumps(servise_shemas)
-        await redis_manager.set("servises", servise_json, 10)
-        return servises
+    print(f"ble")
+    return await db.servises.get_all()
         
-    servise_dicts = json.loads(servises_from_cache)    
-    return servise_dicts
