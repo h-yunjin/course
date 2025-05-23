@@ -1,12 +1,8 @@
-from typing import Annotated
-from fastapi import APIRouter, HTTPException, Response, Depends
-
+from fastapi import APIRouter, HTTPException, Response
 import sqlalchemy
 
 
 from src.services.auth import AuthServise
-from src.db import async_session_maker
-from src.repositories.users import UsersRepositories
 from src.shemas.users import UserAdd, UserRequestAdd
 from src.api.dependensies import DB_Dep, UserIdDEp
 

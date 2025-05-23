@@ -5,8 +5,7 @@ from fastapi_cache.decorator import cache
 
 from src.shemas.hotels import HotelAdd, PatchHotel
 from src.api.dependensies import DB_Dep, PaginationDep
-from src.db import async_session_maker, engine
-from src.repositories.hotels import HotelsRepositories
+from src.tasks.tasks import sleepp
 
 
 
@@ -57,6 +56,7 @@ async def add_hotel(
 })):
     hotels = await db.hotels.add(hotel_table)
     await db.commit() 
+    sleepp.delay()
     return {"status": "OK", "data": hotels}
 
 
@@ -102,17 +102,3 @@ async def get_hotel(
     hotel_id: int = Path(description="айдишник")
 ):
     return await db.hotels.get_one_or_none(id=hotel_id)
-
-
-
-
-
-    
-
-
-    
-
-
-
-
-
