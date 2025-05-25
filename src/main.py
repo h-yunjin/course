@@ -2,7 +2,7 @@
 # ruff: noqa: E402
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-import uvicorn 
+import uvicorn
 
 
 import sys
@@ -27,12 +27,13 @@ from src.api.images import router as router_images
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-   #при входе в систему
-   await redis_manager.connect()
-   FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
-   yield
-   #при выходе из системы
-   await redis_manager.close()
+    # при входе в систему
+    await redis_manager.connect()
+    FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
+    yield
+    # при выходе из системы
+    await redis_manager.close()
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -44,11 +45,7 @@ app.include_router(router_facilities)
 app.include_router(router_images)
 
 
-
-from src.db import *  
+from src.db import *
 
 if __name__ == "__main__":
-       uvicorn.run("main:app", reload=True)
-
-
-
+    uvicorn.run("main:app", reload=True)

@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import date
 
+
 class BookingsRequestAdd(BaseModel):
     room_id: int
     date_from: date
@@ -8,9 +9,9 @@ class BookingsRequestAdd(BaseModel):
 
 
 class BookingsAdd(BookingsRequestAdd):
-    user_id: int  
+    user_id: int
     price: int
 
 
 class Bookings(BookingsAdd):
-    id: int    
+    id: int

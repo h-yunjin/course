@@ -7,6 +7,7 @@ if typing.TYPE_CHECKING:
 
 from src.db import Base
 
+
 class FacilitiesOrm(Base):
     __tablename__ = "servises"
 
@@ -20,11 +21,8 @@ class FacilitiesOrm(Base):
 
 
 class FacilitiesRoomsOrm(Base):
-    __tablename__ = "servises_rooms"   
+    __tablename__ = "servises_rooms"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
     servise_id: Mapped[int] = mapped_column(ForeignKey("servises.id"))
-
-
-    

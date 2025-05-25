@@ -8,7 +8,7 @@ from src.repositories.base import BaseRepositories
 
 
 class UsersRepositories(BaseRepositories):
-    model=UsersOrm
+    model = UsersOrm
     mapper = UserMapper
 
     async def get_hashed_psw(self, email: EmailStr):

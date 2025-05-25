@@ -11,25 +11,17 @@ from src.models.hotels import HotelsOrm
 class HotelsRepositories(BaseRepositories):
     model = HotelsOrm
     mapper = HotelMapper
-    
+
     async def get_filtered_by_time(
-            self,
-            date_from, 
-            date_to, 
-            title, 
-            location, 
-            limit, 
-            ofset
-):
+        self, date_from, date_to, title, location, limit, ofset
+    ):
         rooms_ids_to_get = get_id_bookings(date_from, date_to)
-        query = (
-            select(RoomsOrm.hotel_id)
-            .filter(RoomsOrm.id.in_(rooms_ids_to_get))
-        )
+        query = select(RoomsOrm.hotel_id).filter(RoomsOrm.id.in_(rooms_ids_to_get))
         if location:
-            query = query.filter(func.lower(HotelsOrm.location).like(f"%{location.lower()}%"))
+            query = query.filter(
+                func.lower(HotelsOrm.location).like(f"%{location.lower()}%")
+            )
         if title:
             query = query.filter(func.lower(HotelsOrm.title).like(f"%{title.lower()}%"))
         query = query.limit(limit).offset(ofset)
         return await self.get_filtered(HotelsOrm.id.in_(query))
-       

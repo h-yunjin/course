@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 
 from src.shemas.facilities import Facilities
 
+
 class RoomRequestAdd(BaseModel):
     title: str
     description: str | None = Field(None)
@@ -22,7 +23,7 @@ class PatchRequestRoomAdd(BaseModel):
     title: str | None = Field(None)
     description: str | None = Field(None)
     price: float | None = Field(None)
-    quentity: int | None = Field(None)  
+    quentity: int | None = Field(None)
     servises_ids: list[int] | None = None
 
 
@@ -37,5 +38,6 @@ class PatchRoomAdd(BaseModel):
 class Room(RoomAdd):
     id: int
 
+
 class RoomWithRels(Room):
-    servises: list[Facilities]    
+    servises: list[Facilities]

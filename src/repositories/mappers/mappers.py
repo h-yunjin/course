@@ -15,22 +15,27 @@ class HotelMapper(Mapper):
     db_model = HotelsOrm
     shema = Hotel
 
+
 class RoomMapper(Mapper):
     db_model = RoomsOrm
     shema = Room
+
 
 class BookingsMapper(Mapper):
     db_model = BookingsOrm
     shema = Bookings
 
+
 class UserMapper(Mapper):
     db_model = UsersOrm
-    shema = User       
+    shema = User
+
 
 class ServiseMapper(Mapper):
     db_model = FacilitiesOrm
-    shema = Facilities  
+    shema = Facilities
+
 
 class ServiseRoomMapper(Mapper):
     db_model = FacilitiesRoomsOrm
-    shema = FacilitiesRoom         
+    shema = FacilitiesRoom

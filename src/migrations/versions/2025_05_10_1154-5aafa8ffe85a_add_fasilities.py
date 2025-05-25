@@ -45,4 +45,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("servises_rooms")
     op.drop_table("servises")
-

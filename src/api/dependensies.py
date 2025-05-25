@@ -6,13 +6,16 @@ from src.services.auth import AuthServise
 from src.db import async_session_maker
 from src.utils.db_manager import DB_Manager
 
+
 class Pagination(BaseModel):
     page: Annotated[int | None, Query(1, gt=0)]
     per_page: Annotated[int | None, Query(None, gt=0, lt=30)]
 
-PaginationDep = Annotated[Pagination, Depends()]    
 
-#----------------------------------------------------------------------------------------------------------------------------------------
+PaginationDep = Annotated[Pagination, Depends()]
+
+# ----------------------------------------------------------------------------------------------------------------------------------------
+
 
 def get_token(request: Request):
     token = request.cookies.get("access_token", None)
@@ -29,7 +32,8 @@ def current_user_id(token: Annotated[str, Depends(get_token)]) -> int:
 UserIdDEp = Annotated[str, Depends(current_user_id)]
 
 
-#----------------------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------------------------
+
 
 async def get_db():
     async with DB_Manager(async_session_maker) as db:

@@ -9,7 +9,6 @@ class BookingsRepositories(BaseRepositories):
     model = BookingsOrm
     mapper = BookingsMapper
 
-
     async def get_bookings_with_today(self):
         today = date.today()
         self.get_filtered(date_from=today)

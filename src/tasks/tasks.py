@@ -4,6 +4,7 @@ import os
 
 from src.tasks.celery_app import celery_instanse
 
+
 @celery_instanse.task
 def sleepp():
     sleep(20)
@@ -18,9 +19,10 @@ def compress_image(input_image_path):
     with Image.open(input_image_path) as img:
         base_name, ext = os.path.splitext(os.path.basename(input_image_path))
         output_dir = "src/static/images"
-        os.makedirs(output_dir, exist_ok=True)      
+        os.makedirs(output_dir, exist_ok=True)
         for size in target_sizes:
-            img_resized = img.resize((size, int(size * img.height / img.width)), Image.LANCZOS)
+            img_resized = img.resize(
+                (size, int(size * img.height / img.width)), Image.LANCZOS
+            )
             output_image_path = os.path.join(output_dir, f"{base_name}_{size}px{ext}")
             img_resized.save(output_image_path)
-

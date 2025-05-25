@@ -12,7 +12,9 @@ from src.config import settings
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", f"{settings.DB_URL}?async_fallback=True") # сдесь переобределяем sqlalchemy.url .
+config.set_main_option(
+    "sqlalchemy.url", f"{settings.DB_URL}?async_fallback=True"
+)  # сдесь переобределяем sqlalchemy.url .
 # с f строкой так делаем так как джижок асинхронный. а нам нужно чтобы было синхронно
 
 # Interpret the config file for Python logging.
@@ -24,12 +26,12 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from src.db import Base 
-from src.models.hotels import HotelsOrm 
-from src.models.rooms import RoomsOrm 
+from src.db import Base
+from src.models.hotels import HotelsOrm
+from src.models.rooms import RoomsOrm
 from src.models.users import UsersOrm
-from src.models.bookings import BookingsOrm 
-from src.models.facilities import FacilitiesOrm, FacilitiesRoomsOrm 
+from src.models.bookings import BookingsOrm
+from src.models.facilities import FacilitiesOrm, FacilitiesRoomsOrm
 
 target_metadata = Base.metadata
 
@@ -77,9 +79,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
