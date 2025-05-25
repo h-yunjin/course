@@ -1,7 +1,7 @@
-from sqlalchemy import insert, select, update, delete
+from sqlalchemy import insert, select, delete
 
 from src.repositories.mappers.mappers import ServiseMapper, ServiseRoomMapper
-from src.db import engine
+# from src.db import engine
 from src.models.facilities import FacilitiesOrm, FacilitiesRoomsOrm
 from src.repositories.base import BaseRepositories
 

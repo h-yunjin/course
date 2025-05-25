@@ -9,7 +9,6 @@ Create Date: 2025-04-29 15:04:54.894578
 from typing import Sequence, Union
 
 from alembic import op
-import sqlalchemy as sa
 
 
 revision: str = "a868fb886eef"

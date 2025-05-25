@@ -1,7 +1,7 @@
 from datetime import date
 from fastapi import APIRouter, Body, Path, Query
 
-from shemas.facilities import FacilitiesAdd, FacilitiesRoomAdd
+from shemas.facilities import FacilitiesRoomAdd
 from src.api.dependensies import DB_Dep
 from src.shemas.rooms import PatchRequestRoomAdd, PatchRoomAdd, RoomAdd, RoomRequestAdd
 
@@ -21,7 +21,7 @@ async def get_room(
 
 
 @router.get("/{hotel_id}/rooms", summary="получение всех номеров")
-async def get_room(
+async def get_all_rooms(
     db: DB_Dep,
     date_from: date = Query(example="2025-05-06"),
     date_to: date = Query(example="2025-05-07"),

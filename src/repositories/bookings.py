@@ -1,5 +1,4 @@
 from datetime import date
-from sqlalchemy import insert, select, update, delete
 
 from src.repositories.mappers.mappers import BookingsMapper
 from src.models.bookings import BookingsOrm

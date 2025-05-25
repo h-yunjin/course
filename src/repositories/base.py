@@ -1,6 +1,5 @@
 # print(query.compile(engine, compile_kwargs={"literal_binds": True}))
 from sqlalchemy import select, insert, delete, update
-from sqlalchemy.sql import exists  
 from pydantic import BaseModel
 
 from src.repositories.mappers.base import Mapper

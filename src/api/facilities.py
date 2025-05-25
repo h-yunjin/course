@@ -1,10 +1,8 @@
-import json
 from fastapi import APIRouter
 from fastapi_cache.decorator import cache
 
 from src.api.dependensies import DB_Dep
 from src.shemas.facilities import FacilitiesAdd
-from src.init import redis_manager
 
 router = APIRouter(prefix="/servises", tags=["удобства"])
 
@@ -24,6 +22,6 @@ async def add_servises(
 async def get_all_servises(
     db: DB_Dep
 ):
-    print(f"ble")
+    print("ble")
     return await db.servises.get_all()
         

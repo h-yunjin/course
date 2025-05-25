@@ -30,7 +30,7 @@ async def register(
     try:
         await db.users.add(hashed_data)
     except sqlalchemy.exc.IntegrityError:
-        return f"ты дурак. такой емейл уже существует"        
+        return "ты дурак. такой емейл уже существует"        
     await db.commit()
     return {"status": "OK"}
   

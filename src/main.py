@@ -1,3 +1,5 @@
+# ruff: noqa: F403
+# ruff: noqa: E402
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import uvicorn 

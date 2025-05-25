@@ -3,10 +3,9 @@ from sqlalchemy import select, func
 from src.repositories.mappers.mappers import HotelMapper
 from src.models.rooms import RoomsOrm
 from src.repositories.utils import get_id_bookings
-from src.shemas.hotels import Hotel
 from src.repositories.base import BaseRepositories
 from src.models.hotels import HotelsOrm
-from src.db import engine
+# from src.db import engine
 
 
 class HotelsRepositories(BaseRepositories):

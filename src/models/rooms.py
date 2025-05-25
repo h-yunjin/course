@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, ForeignKey
+import typing
 
+if typing.TYPE_CHECKING:
+    from src.models.facilities import FacilitiesOrm
+    
 from src.db import Base
 
 class RoomsOrm(Base):
