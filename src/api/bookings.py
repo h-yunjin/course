@@ -1,5 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
+from src.shemas.rooms import Room
+from src.exeptions import All_Rooms_Are_Booked_Exeption, ObjectNotFoundExeption, RoomNotFoundHTTPExeption
 from src.api.dependensies import DB_Dep, UserIdDEp
 from src.shemas.bookings import BookingsAdd, BookingsRequestAdd
 
@@ -12,11 +14,17 @@ async def booking(
     db: DB_Dep,
     user_id: UserIdDEp,
 ):
-    room = await db.rooms.get_one_or_none(id=book_table.room_id)
+    try:
+        room: Room = await db.rooms.get_one(id=book_table.room_id)
+    except ObjectNotFoundExeption as ex:
+        raise RoomNotFoundHTTPExeption
     _book_table = BookingsAdd(
         user_id=user_id, **book_table.model_dump(), price=room.price
     )
-    booking = await db.bookings.add(_book_table)
+    try:
+        booking = await db.bookings.add_bookings(_book_table, room.hotel_id)
+    except All_Rooms_Are_Booked_Exeption as ex:
+        raise HTTPException(status_code=409, detail=ex.detail)     
     await db.commit()
     return {"data": booking}
 

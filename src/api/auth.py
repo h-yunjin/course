@@ -3,6 +3,7 @@ import sqlalchemy
 
 
 from src.services.auth import AuthServise
+from src.exeptions import ObjectAlreadyExistsExeption
 from src.shemas.users import UserAdd, UserRequestAdd
 from src.api.dependensies import DB_Dep, UserIdDEp
 
@@ -30,9 +31,9 @@ async def register(
     hashed_data = UserAdd(email=data.email, password=hashed_password)
     try:
         await db.users.add(hashed_data)
-    except sqlalchemy.exc.IntegrityError:
-        return "ты дурак. такой емейл уже существует"
-    await db.commit()
+        await db.commit()
+    except ObjectAlreadyExistsExeption as ex:
+        return HTTPException(status_code=409, detail="пользователь с таким имейлом уже зарегестрирован.")
     return {"status": "OK"}
 
 

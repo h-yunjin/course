@@ -1,8 +1,9 @@
 from typing import Annotated
-from fastapi import Query, Path, APIRouter, Body, Depends
+from fastapi import HTTPException, Query, Path, APIRouter, Body, Depends
 from datetime import date
 from fastapi_cache.decorator import cache
 
+from src.exeptions import HotelNotFoundHTTPExeption, ObjectNotFoundExeption, check_date_to_date_from
 from src.shemas.hotels import HotelAdd, PatchHotel
 from src.api.dependensies import DB_Dep, PaginationDep
 from src.tasks.tasks import sleepp
@@ -22,6 +23,7 @@ async def get_hotels(
     date_to: date = Query(example="2025-05-07"),
 ):
     per_page = pagination.per_page or 100
+    check_date_to_date_from(date_to, date_from)
     hotels = await db.hotels.get_filtered_by_time(
         date_from,
         date_to,
@@ -95,4 +97,8 @@ async def update(
 
 @router.get("/{hotel_id}", summary="получение отеля по айдишнику")
 async def get_hotel(db: DB_Dep, hotel_id: int = Path(description="айдишник")):
-    return await db.hotels.get_one_or_none(id=hotel_id)
+    try:
+        return await db.hotels.get_one(id=hotel_id)
+    except ObjectNotFoundExeption as ex: 
+        raise HotelNotFoundHTTPExeption
+

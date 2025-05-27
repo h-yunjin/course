@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
+
 from src.repositories.mappers.mappers import RoomMapper
 from src.db import engine
 from src.shemas.rooms import RoomWithRels
@@ -35,7 +36,12 @@ class RoomsRepositories(BaseRepositories):
             .filter_by(id=id, hotel_id=hotel_id)
         )
         result = await self.session.execute(query)
+        model_ = result.unique().scalars().all()
         return [
             RoomWithRels.model_validate(model, from_attributes=True)
-            for model in result.unique().scalars().all()
+            for model in model_
         ]
+
+
+
+       

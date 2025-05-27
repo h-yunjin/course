@@ -1,7 +1,8 @@
 from datetime import date
-from fastapi import APIRouter, Body, Path, Query
+from fastapi import APIRouter, Body, HTTPException, Path, Query
 
-from shemas.facilities import FacilitiesRoomAdd
+from src.exeptions import HotelNotFoundHTTPExeption,  ObjectNotFoundExeption, RoomNotFoundHTTPExeption, check_date_to_date_from
+from src.shemas.facilities import FacilitiesRoomAdd
 from src.api.dependensies import DB_Dep
 from src.shemas.rooms import PatchRequestRoomAdd, PatchRoomAdd, RoomAdd, RoomRequestAdd
 
@@ -17,8 +18,10 @@ async def get_room(
     hotel_id: int = Path(description="айдишник отеля"),
     room_id: int = Path(description="айдишник номера"),
 ):
-    rooms = await db.rooms.get_one_or_none_with_rels(id=room_id, hotel_id=hotel_id)
-    return {"data": rooms}
+    room = await db.rooms.get_one_or_none_with_rels(id=room_id, hotel_id=hotel_id)
+    if not room:
+        raise RoomNotFoundHTTPExeption
+    return room
 
 
 @router.get("/{hotel_id}/rooms", summary="получение всех номеров")
@@ -28,10 +31,13 @@ async def get_all_rooms(
     date_to: date = Query(example="2025-05-07"),
     hotel_id: int = Path(description="айдишник отеля"),
 ):
+    check_date_to_date_from(date_to, date_from)
     rooms = await db.rooms.get_filtered_by_time(
         date_from=date_from, date_to=date_to, hotel_id=hotel_id
-    )
+        )
     return {"data": rooms}
+    
+        
 
 
 @router.post("/{hotel_id}/rooms", summary="добавление номера")
@@ -64,6 +70,10 @@ async def add_room(
     ),
 ):
     _room_table = RoomAdd(hotel_id=hotel_id, **room_table.model_dump())
+    try:
+        await db.hotels.get_one(id=hotel_id)
+    except ObjectNotFoundExeption as ex:
+        raise HotelNotFoundHTTPExeption
     rooms = await db.rooms.add(_room_table)
     rooms_servises = [
         FacilitiesRoomAdd(room_id=rooms.id, servise_id=sr_id)
@@ -74,14 +84,22 @@ async def add_room(
     return {"data": rooms}
 
 
-@router.delete("/{hotel_id}/rooms", summary="удаление номера")
+@router.delete("/{hotel_id}/rooms/{room_id}", summary="удаление номера")
 async def delete_room(
     db: DB_Dep,
     hotel_id: int = Path(description="айдишник отеля"),
     room_id: int = Path(description="айдишник номера"),
 ):
-    room = db.rooms.delete(id=room_id, hotel_id=hotel_id)
-    await db.rooms.commit()
+    try:
+        await db.rooms.get_one(id=hotel_id)
+    except ObjectNotFoundExeption as ex:
+        raise RoomNotFoundHTTPExeption
+    try:
+        await db.hotels.get_one(id=hotel_id)
+    except ObjectNotFoundExeption as ex:
+        raise HotelNotFoundHTTPExeption    
+    room = await db.rooms.delete(id=room_id, hotel_id=hotel_id)
+    await db.commit()
     return {"data": room}
 
 
@@ -93,6 +111,14 @@ async def update_all(
     room_id: int = Path(description="айдишник номера"),
 ):
     _room_table = RoomAdd(hotel_id=hotel_id, **room_table.model_dump())
+    try:
+        await db.rooms.get_one(id=hotel_id)
+    except ObjectNotFoundExeption as ex:
+        raise RoomNotFoundHTTPExeption
+    try:
+        await db.hotels.get_one(id=hotel_id)
+    except ObjectNotFoundExeption as ex:
+        raise HotelNotFoundHTTPExeption    
     await db.rooms.edit(_room_table, id=room_id)
     await db.servisesroom.edit_servises(room_id, room_table.servises_ids)
     await db.commit()
@@ -109,7 +135,15 @@ async def update(
     _room_table = PatchRoomAdd(
         hotel_id=hotel_id, **room_table.model_dump(exclude_unset=True)
     )
-    await db.rooms.edit(_room_table, exclude_unset=True, id=room_id, hotel_id=hotel_id)
+    try:
+        await db.rooms.get_one(id=hotel_id)
+    except ObjectNotFoundExeption as ex:
+        raise RoomNotFoundHTTPExeption
+    try:
+        await db.hotels.get_one(id=hotel_id)
+    except ObjectNotFoundExeption as ex:
+        raise HotelNotFoundHTTPExeption
+    await db.rooms.edit(_room_table, exclude_unset=True, id=room_id, hotel_id=hotel_id)  
     if room_table.servises_ids is not None:
         await db.servisesroom.edit_servises(room_id, room_table.servises_ids)
     await db.commit()
